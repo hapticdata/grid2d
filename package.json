@@ -1,0 +1,28 @@
+{
+  "name": "grid2d",
+  "version": "0.1.0",
+  "description": "generate 2-dimensional grids and perform common operations on them",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hapticdata/grid2d.git"
+  },
+  "keywords": [
+  ],
+  "author": "Kyle Phillips <kyle@haptic-data.com> (http://hapticdata.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hapticdata/grid2d/issues"
+  },
+  "homepage": "https://github.com/hapticdata/grid2d.git",
+  "devDependencies": {
+    "tape": "^4.0.0"
+  },
+  "dependencies": {
+    "object-defaults": "^0.1.0",
+    "sort-by": "^1.1.0"
+  }
+}
