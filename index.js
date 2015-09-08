@@ -55,12 +55,14 @@ shiftCellsDefaults = {
  *      paddingTop    : 0
 * }}
 */
-exports.create = function(grid){
+function create(grid){
     grid = defaults(grid||{}, gridDefaults);
     grid.cells = grid.cells || [];
     exports.createCells(grid, grid.cells);
     return grid;
-};
+}
+
+module.exports = exports = create;
 
 
 /**
@@ -615,7 +617,7 @@ exports.sortByGridPosition = function( a, b ){
  * @returns {Object}
  */
 exports.partial = function( grid ){
-    grid = exports.create(grid);
+    grid = create(grid);
 
     //dont want these functions in the chain
     var exclude = [ 'partial', 'create' ];
