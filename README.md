@@ -8,7 +8,7 @@ Calculate and manipulate 2-dimensional grids in node and browser.
 
 
 
-##Usage
+## Usage
 
 `grid2d()` requires an object with `columns` and `rows` properties, the rest of the parameters have default values, and result with include the calculated cells.
 ```js
@@ -68,6 +68,6 @@ grid2d.computeCellBounds(selected);
 
 
 
-##License
+## License
 
 MIT, see [LICENSE.md](http://github.com/hapticdata/change-keys/blob/master/LICENSE.md) for details.
