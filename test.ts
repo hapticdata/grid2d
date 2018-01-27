@@ -18,7 +18,7 @@ test('cellIndex', (t)=>{
 		row: 2
 	};
 
-	let i = grid2d.cellIndex(grid, p);
+	let i : Number = grid2d.cellIndex(grid, p);
 	t.equals(i, grid.columns * p.row + p.column, 'cellIndex');
 
 	//look up the index if its set to column-major
