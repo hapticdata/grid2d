@@ -6,8 +6,10 @@
   "types": "index.d.ts",
   "scripts": {
     "test": "tsc test.ts && node --debug test.js",
-    "examples": "tsc --module umd example/basic.ts",
-    "build": "tsc --declaration index.ts"
+    "examples": "browserify example/basic.ts -p [ tsify ] > example/basic.js",
+    "examples-watch": "watchify example/basic.ts -p [ tsify ] -o example/basic.js",
+    "build": "tsc --declaration index.ts",
+    "bundle": "browserify index.ts -p [tsify] --standalone grid2d > grid2d.js"
   },
   "repository": {
     "type": "git",
@@ -21,13 +23,17 @@
   },
   "homepage": "https://github.com/hapticdata/grid2d.git",
   "devDependencies": {
+    "@types/defaults": "^1.0.2",
+    "@types/tape": "^4.2.31",
+    "animitter": "^3.0.0",
+    "browserify": "^15.2.0",
+    "dat-gui": "^0.5.0",
     "tape": "^4.0.0",
-    "typescript": "^2.6.1"
+    "tsify": "^3.0.4",
+    "typescript": "^2.6.2",
+    "watchify": "^3.10.0"
   },
   "dependencies": {
-    "animitter": "^3.0.0",
-    "dat-gui": "^0.5.0",
-    "object-defaults": "^0.1.0",
-    "typescript": "^2.6.1"
+    "defaults": "^1.0.3"
   }
 }

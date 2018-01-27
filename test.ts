@@ -19,21 +19,21 @@ test('cellIndex', (t)=>{
 	};
 
 	let i = grid2d.cellIndex(grid, p);
-	t.equals(i, grid.columns * p.row + p.column);
+	t.equals(i, grid.columns * p.row + p.column, 'cellIndex');
 
 	//look up the index if its set to column-major
 	grid.rowMajor = false;
 	i = grid2d.cellIndex(grid, p);
-	t.equals(i, grid.rows * p.column + p.row);
+{}	t.equals(i, grid.rows * p.column + p.row, 'cellIndex with { rowMajor: false }');
 });
 
 test('cellWidth with minimal information', (t)=>{
     t.plan(2);
     let w : number = grid2d.cellWidth({ columns: 4, rows: 3 });
-    t.equal(w, 0.25);
+    t.equal(w, 0.25, 'cellWidth');
 
     w = grid2d.cellWidth({ columns: 4, rows: 3, width: 4 });
-    t.equal(w, 1);
+    t.equal(w, 1, 'cellWidth with grid.width');
 });
 
 test('closestCellPosition', (t)=>{
@@ -46,13 +46,13 @@ test('closestCellPosition', (t)=>{
     };
 
     let position = grid2d.closestCellPosition(grid, { x: 0, y: 0 });
-    t.ok(position.column === 0 && position.row === 0);
+    t.ok(position.column === 0 && position.row === 0, 'closestCellPosition at (0,0)');
 
     position = grid2d.closestCellPosition(grid, { x: 0.5, y: 0.5 });
-    t.ok(position.column === 5 && position.row === 2);
+    t.ok(position.column === 5 && position.row === 2, 'closestCellPosition at (5,2)');
 
     position = grid2d.closestCellPosition(grid, { x: 2, y: 2});
-    t.ok(position.column === grid.columns-1 && position.row === grid.rows-1);
+    t.ok(position.column === grid.columns-1 && position.row === grid.rows-1, 'closestCellPosition at far corner');
 });
 
 
@@ -65,22 +65,22 @@ test('intersectsCellPosition', (t)=>{
     };
 
 	let position = grid2d.intersectsCellPosition(grid, { x: 0, y: 0 });
-    t.ok(position.column === 0 && position.row === 0);
+    t.ok(position.column === 0 && position.row === 0, 'intersectsCellPosition (0,0)');
 
     position = grid2d.intersectsCellPosition(grid, { x: 0.5, y: 0.5 });
-    t.ok(position.column === 5 && position.row === 2);
+    t.ok(position.column === 5 && position.row === 2, 'intersectsCellPosition (5,2)');
 
     position = grid2d.intersectsCellPosition(grid, { x: 2, y: 2});
-    t.equals(position, undefined);
+    t.equals(position, undefined, 'intersectsCellPosotion undefined');
 });
 
 test('xForColumn with minimal object', (t)=>{
     t.plan(2);
     let x : number = grid2d.xForColumn({ columns: 4, rows: 1 }, 2);
-    t.equal(x, 0.5);
+    t.equal(x, 0.5, 'xForColumn');
 
     x = grid2d.xForColumn({ columns: 4, rows: 1, width: 2 }, 2);
-    t.equal(x, 1);
+    t.equal(x, 1, 'xForColumn with grid.width');
 });
 
 
@@ -98,10 +98,77 @@ test('should generate columns * rows cells', function(t) {
 	};
 
 	const cells: Cell[] = grid2d.createCells(grid);
-	console.log(cells.length);
-	t.equals(cells.length, grid.columns * grid.rows);
+	t.equals(cells.length, grid.columns * grid.rows, 'createCells length should each columns*rows');
 
 	const cell = cells[grid2d.cellIndex(grid, 3, 2)];
-	t.ok(cell.x === grid.width / grid.columns * 3 && cell.y === grid.height / grid.rows * 2);
+	t.ok(cell.x === grid.width / grid.columns * 3 && cell.y === grid.height / grid.rows * 2, 'cellIndex');
 
 });
+
+
+test('scale grid', (t)=>{
+
+	t.plan(13);
+
+	const grid : Grid = {
+		columns: 10,
+		rows: 10
+	};
+
+	let scaled = grid2d.scale({
+		columns: 10,
+		rows: 10
+	}, 100, 200);
+
+	t.equals(scaled.columns, 10, 'scale columns remain the same');
+	t.equals(scaled.rows, 10, 'scale rows remain the same');
+	t.equals(scaled.x, undefined, 'scale x remainds undefined');
+	t.equals(scaled.width, 100, 'scale width multiplies');
+	t.equals(scaled.height, 200, 'scale height multiplies');
+
+
+	scaled = grid2d.scale({
+		columns: 10,
+		rows: 10,
+		x: 2,
+		y: 2,
+		width: 10,
+		height: 5,
+		paddingLeft: 5
+	}, 100, 200);
+
+
+	t.equals(scaled.columns, 10, 'scale columns remain the same');
+	t.equals(scaled.rows, 10, 'scale rows remain the same');
+	t.equals(scaled.x, 200, 'scale x multiplies');
+	t.equals(scaled.y, 400, 'scale y multiplies');
+	t.equals(scaled.width, 1000, 'scale width multiplies');
+	t.equals(scaled.height, 1000, 'scale heigth multiplies');
+	t.equals(scaled.paddingLeft, 500, 'scale paddingLeft multiplies');
+	t.equals(scaled.paddingRight, undefined, 'scale paddingRigth remains undefined');
+
+});
+
+
+test('cellPosition', (t)=>{
+	t.plan(6);
+
+	const grid : Grid = { columns: 4, rows: 3 };
+
+	let p:Position = grid2d.cellPosition(grid, 6);
+	t.equals(p.column, 2, 'cellPosition column correct');
+	t.equals(p.row, 1, 'cellPosition row correct');
+
+	const cell = grid2d.createCellForPosition(grid, 3, 1);
+	p = grid2d.cellPosition(grid, cell);
+	t.equals(p.column, 3, 'createCellForPosition creates cell at correct position');
+	t.equals(p.row, 1, 'createCellForPosition creates cell at correct position');
+
+
+	grid.rowMajor = false;
+	p = grid2d.cellPosition(grid, 6);
+	t.equals(p.column, 2, 'cellPosition creates Position');
+	t.equals(p.row, 0, 'cellPosition creates Position');
+
+});
+

@@ -1,4 +1,3 @@
-/// <reference path="object-defaults.d.ts" />
 export interface Point {
     x?: number;
     y?: number;
@@ -21,6 +20,7 @@ export interface Position {
     column: number;
     row: number;
 }
+export declare const scale: (grid: Grid, scaleX: number, scaleY: number, scaledGrid?: Grid) => Grid;
 /**
  * Generate the cells for a provided grid
  * @param {{ x, y, columns, rows, width, height }} grid
@@ -104,7 +104,7 @@ export declare const closestCellIndex: (grid: Grid, point: Point) => number;
  * @param {{ x, y }} pos the vector of the position
  * @returns {Boolean} true if the point is inside
  */
-export declare const contains: (cell: Cell, point: Point) => boolean;
+export declare const contains: (cell: Cell | Grid, point: Point) => boolean;
 /**
  * Get the bottom-left vertex
  * @param {{ x, y, height }} grid
@@ -134,13 +134,13 @@ export declare const cellIndex: (grid: Grid, c: number | Position, r?: number) =
 /**
  * Provides the column and row for the provided index
  * @param {{ columns:Number }} grid
- * @param {Number} i the index
+ * @param {Number | Cell} i the index, or a Cell
  * @returns {{
  *      column : Number,
  *      row    : Number
  * }}
  */
-export declare function cellPosition(grid: number | Grid, i: number): Position;
+export declare function cellPosition(grid: Grid, i: number | Cell): Position;
 /**
  * Get the width for a cell in the grid
  * @param {Object} grid

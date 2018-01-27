@@ -1,7 +1,4 @@
-/// <reference path="./object-defaults.d.ts" />
-
-import defaults = require("object-defaults");
-
+import defaults = require("defaults");
 
 export interface Point {
     x?: number;
@@ -39,7 +36,7 @@ const val = (grid: Object, prop: string) : any =>
 	(typeof grid[prop] === 'boolean' || _isFinite(grid[prop])) ? grid[prop] : gridDefaults[prop];
 
 const isPosition = (c: any) : c is Position =>
-	typeof c.column === 'number';
+	typeof c === 'object' && typeof c.column === 'number';
 
 
 /**
@@ -68,6 +65,23 @@ const gridDefaults= {
 };
 
 
+
+export const scale = (grid: Grid, scaleX: number, scaleY: number, scaledGrid: Grid = null) : Grid =>{
+	scaledGrid = (<any>Object).assign(scaledGrid || {}, grid);
+
+	scaledGrid.width = val(grid, 'width') * scaleX;
+	scaledGrid.height = val(grid, 'height') * scaleY;
+
+	const makeScaler = (scale)=>
+		(property)=>_isFinite(grid[property]) && (scaledGrid[property] *= scale);
+
+	//scale all the other properties
+	//but only if they have already been defined
+	['x', 'paddingLeft', 'paddingRight'].forEach(makeScaler(scaleX));
+	['y', 'paddingBottom', 'paddingTop'].forEach(makeScaler(scaleY));
+
+	return scaledGrid;
+}
 
 
 //default parameters for `shiftCells` function
@@ -263,20 +277,21 @@ export const closestCellPosition = function(grid: Grid, point: Point) : Position
         minDistanceX : number = Number.MAX_VALUE,
         minDistanceY : number = Number.MAX_VALUE;
 
+	//find minimum distances from the center of each cell
     for(let i=0; i<grid.columns; i++){
-        let dist = Math.abs(point.x - xForColumn(grid,i));
+        let dist = Math.abs(point.x - (xForColumn(grid,i) + cellWidth(grid) / 2));
         if(dist < minDistanceX){
             minDistanceX = dist;
             column = i;
         }
     }
     for(let i=0; i<grid.rows; i++){
-        let dist = Math.abs(point.y - yForRow(grid,i));
+        let dist = Math.abs(point.y - (yForRow(grid,i) + cellHeight(grid) / 2));
         if(dist < minDistanceY){
             minDistanceY = dist;
             row = i;
         }
-    }
+	}
 
     return { column, row };
 };
@@ -297,7 +312,7 @@ export const closestCellIndex = (grid: Grid, point: Point) : number =>
  * @param {{ x, y }} pos the vector of the position
  * @returns {Boolean} true if the point is inside
  */
-export const contains = (cell: Cell, point: Point) : boolean =>
+export const contains = (cell: Cell | Grid, point: Point) : boolean =>
     point.x >= val(cell,'x') && point.x <= val(cell,'x') + val(cell,'width') &&
     point.y >= val(cell,'y') && point.y <= val(cell,'y') + val(cell,'height');
 
@@ -356,13 +371,13 @@ export const cellIndex = function( grid: Grid, c : number | Position, r?: number
 /**
  * Provides the column and row for the provided index
  * @param {{ columns:Number }} grid
- * @param {Number} i the index
+ * @param {Number | Cell} i the index, or a Cell
  * @returns {{
  *      column : Number,
  *      row    : Number
  * }}
  */
-export function cellPosition( grid : number | Grid, i: number ) : Position {
+export function cellPosition( grid : Grid, i: number | Cell ) : Position {
     if( i === 0 ) {
         return {
             column: 0,
@@ -370,23 +385,51 @@ export function cellPosition( grid : number | Grid, i: number ) : Position {
         };
 	}
 
-	let rowMajor : boolean = val(grid, 'rowMajor');
 
+	//if first param is a Grid and second param is a Cell
+	if(typeof i === 'object' && typeof grid === 'object'){
+		const cell = <Cell>i;
+		const g = <Grid>grid;
+
+		let column = -1;
+		let row = -1;
+		//its a cell, find the the column and row for it
+		for(let c : number = 0; c < g.columns; c++){
+			if(xForColumn(grid, c) === cell.x){
+				console.log(`column ${c}`)
+				column = c;
+				break;
+			}
+		}
+		for(let r : number = 0; r < g.rows; r++){
+			if(yForRow(grid, r) === cell.y){
+				row = r;
+				break;
+			}
+		}
+
+		return {
+			column,
+			row
+		};
+	}
+
+	const p:number = <number>i;
 
 	if(val(grid, 'rowMajor')){
 		let columns : number = _isFinite(grid) ? (<number>grid) : (<Grid>grid).columns;
 
 		return {
-			row: Math.floor(i / columns),
-			column: ( i % columns )
+			row: Math.floor(p / columns),
+			column: ( p % columns )
 		};
 	}
 
 
 	let rows : number = _isFinite(grid) ? (<number>grid) : (<Grid>grid).rows;
 	return {
-		row: Math.floor(i % rows ),
-		column: Math.floor(i / rows)
+		row: Math.floor(p % rows ),
+		column: Math.floor(p / rows)
 	};
 };
 
