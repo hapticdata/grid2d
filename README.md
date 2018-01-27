@@ -1,7 +1,7 @@
 # grid2d
-[![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
+[![Build Status](https://travis-ci.org/hapticdata/animitter.png?branch=master)](https://travis-ci.org/hapticdata/animitter)
 
-[![NPM](https://nodei.co/npm/grid2d.png)](https://npmjs.org/package/change-keys)
+[![NPM](https://nodei.co/npm/grid2d.png)](https://npmjs.org/package/grid2d)
 
 Calculate and manipulate 2-dimensional grids in node and browser.
 
@@ -42,7 +42,7 @@ would generate the following object:
      { column: 1, row: 2, x: 0.5, y: 0.5, width: 0.4, height: 0.25 },
      { column: 0, row: 3, x: 0, y: 0.75, width: 0.4, height: 0.25 },
      { column: 1, row: 3, x: 0.5, y: 0.75, width: 0.4, height: 0.25 } ] }
-     
+
 ```
 
 But its capabilities go much beyond that. Look at the documented source to see all of its functionality. One helpful method is `grid2d.selectCells(grid, column1, row1, column2, row2)`
@@ -55,7 +55,7 @@ var grid = grid2d({
 
 //select the cells in the 5th column between rows 2 and 4
 var selected = grid2d.selectCells(grid, 5, 2, 5, 4);
-//--> 
+//-->
 //[ { column: 5, row: 2, x: 0.5, y: 0.25, width: 0.1, height: 0.125 },
 //  { column: 5, row: 3, x: 0.5, y: 0.375, width: 0.1, height: 0.125 },
 //  { column: 5, row: 4, x: 0.5, y: 0.5, width: 0.1, height: 0.125 } ]
