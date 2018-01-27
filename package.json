@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "tsc test.ts && node --debug test.js",
+    "test": "tsc test.ts && node test.js",
     "examples": "browserify example/basic.ts -p [ tsify ] > example/basic.js",
     "examples-watch": "watchify example/basic.ts -p [ tsify ] -o example/basic.js",
     "build": "tsc --declaration index.ts",
