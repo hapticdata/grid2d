@@ -38,7 +38,7 @@ const x : number = grid2d.xForColumn(grid, 2); //<- 0.5
 
 
 //this will create Cells for the selected columns (2-4) and rows (1-2)
-const cells: Cell[] = grid2d.selectCells({ columns: 4, rows: 5 }, 2, 1, 4, 2);
+const cells: Cell[] = grid2d.createCellsBetween({ columns: 4, rows: 5 }, { column: 2, row: 1 }, { column: 4, row: 2 });
 // result is:
 // [ { x: 0.5, y: 0.2, width: 0.25, height: 0.2 },
 //  { x: 0.5, y: 0.4, width: 0.25, height: 0.2 },
