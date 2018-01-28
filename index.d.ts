@@ -72,8 +72,8 @@ export declare const createCellForIndex: (grid: Grid, index: number, cell?: Cell
 export declare const createCellForPosition: (grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell) => Cell;
 /**
  * Find the closest cell to the postion vector
- * @param {Object} grid
- * @param {Object} pos the position vector
+ * @param {Grid} grid
+ * @param {Position} pos the position vector
  * @returns {{
  *      x      : Number,
  *      y      : Number,
@@ -205,14 +205,14 @@ export declare const intersectsCellPosition: (grid: Grid, point: Point) => Posit
 export declare const intersectsCellIndex: (grid: Grid, point: Point) => number;
 /**
  * Select a range of cells from the grid
- * @param {{ cells:Array }} grid the grid
- * @param {Number} c1 the first column index
- * @param {Number} r1 the first row index
- * @param {Number} c2 the second column index
- * @param {Number} r2 the second row index
- * @returns {Array} cells
+ * @param {Cell[]} grid the grid
+ * @param {Position | Number} posStart_columnStart the first column index
+ * @param {Position | Number} posStop_columnStop the first row index
+ * @param {Number} [rowStart] the second column index
+ * @param {Number} [rowStop] the second row index
+ * @returns {Cell:[]} cells
  */
-export declare const selectCells: (grid: Grid, c1: any, r1: any, c2: any, r2: any) => Cell[];
+export declare const createCellsBetween: (grid: Grid, posStart_columnStart: number | Position, posStop_columnStop: number | Position, rowStart: number, rowStop: number) => Cell[];
 /**
  * shift all cells over
  * @param {Object} grid

@@ -46,15 +46,17 @@ const cells: Cell[] = grid2d.selectCells({ columns: 4, rows: 5 }, 2, 1, 4, 2);
 //   { x: 0.75, y: 0.4, width: 0.25, height: 0.2 },
 //   { x: 1, y: 0.2, width: 0.25, height: 0.2 },
 //   { x: 1, y: 0.4, width: 0.25, height: 0.2 } ]
-  
+
 ```
 
 
 ## API
 
+`cellBounds(grid: Grid) => Cell;`
+
 `createCells((grid: Grid, arr?: Cell[]) => Cell[];`
 
-`cellBounds(grid: Grid) => Cell;`
+`createCellsBetween(grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, [rowStart: number, rowStop: number]) => Cell[];`
 
 `createCellForIndex(grid: Grid, index: number, cell?: Cell) => Cell;`
 
@@ -97,8 +99,6 @@ const cells: Cell[] = grid2d.selectCells({ columns: 4, rows: 5 }, 2, 1, 4, 2);
 `intersectsCellIndex(grid: Grid, point: Point) => number;`
 
 `scale(grid: Grid, scaleX: number, scaleY: number, scaledGrid?: Grid) => Grid;`
-
-`selectCells(grid: Grid, c1: any, r1: any, c2: any, r2: any) => Cell[];`
 
 `shiftCells(grid: any, params: any) => any;`
 
