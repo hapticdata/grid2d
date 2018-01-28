@@ -1,6 +1,6 @@
 {
   "name": "grid2d",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "generate 2-dimensional grids and perform common operations on them",
   "main": "index.js",
   "types": "index.d.ts",
