@@ -1,5 +1,7 @@
 import defaults = require("defaults");
 
+export { defaults };
+
 export interface Point {
     x?: number;
     y?: number;
@@ -174,6 +176,7 @@ export const createCells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
  * }}
  */
 
+ //TODO: this should be receiving Cell[] not a Grid
 export const cellBounds = function(grid: Grid) : Cell {
 
     let left : number = val(grid,'x'),
@@ -473,8 +476,8 @@ export const cellHeight = function(grid : Grid) : number {
  */
 export const center = function(cell: Cell) : Point {
     return {
-        x: cell.x + val(cell,'width') / 2,
-        y: cell.y + val(cell,'height') / 2
+        x: val(cell,'x') + val(cell,'width') / 2,
+        y: val(cell,'y') + val(cell,'height') / 2
     };
 };
 
@@ -587,7 +590,7 @@ export const intersectsCellIndex = (grid: Grid, point: Point) : number =>
  * @param {Number} [rowStop] the second row index
  * @returns {Cell:[]} cells
  */
-export const createCellsBetween = function( grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, rowStart: number, rowStop: number ) : Cell[] {
+export const createCellsBetween = function( grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, rowStart?: number, rowStop?: number ) : Cell[] {
     let c1: number;
     let c2: number;
     let r1: number;
@@ -610,6 +613,7 @@ export const createCellsBetween = function( grid: Grid, posStart_columnStart: Po
 
     return cells;
 };
+
 
 
 
