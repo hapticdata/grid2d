@@ -131,6 +131,31 @@ export const cells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
     return arr;
 };
 
+ function cellBounds(cells:Cell[]): Cell {
+
+	let minX:number = Number.MAX_VALUE;
+	let minY:number = Number.MAX_VALUE;
+	let maxX:number = Number.MIN_VALUE;
+	let maxY:number = Number.MIN_VALUE;
+
+	for(let i:number = 0; i<cells.length; i++){
+		const c:Cell = cells[i];
+		const tl:Point = topLeft(c);
+		const br:Point = bottomRight(c);
+
+		minX = Math.min(minX, tl.x, br.x);
+		minY = Math.min(minY, tl.y, br.y);
+		maxX = Math.max(maxX, tl.x, br.x);
+		maxY = Math.max(maxY, tl.y, br.y);
+	}
+
+	return {
+		x: minX,
+		y: minY,
+		width: maxX - minX,
+		height: maxY - minY
+	};
+ }
 
 /**
  * Compute the boundaries of the cells provided
@@ -143,9 +168,11 @@ export const cells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
  *      height:Number
  * }}
  */
+export const bounds = function(grid: Grid | Cell[]) : Cell {
 
- //TODO: this should be receiving Cell[] not a Grid
-export const cellBounds = function(grid: Grid) : Cell {
+	if(Array.isArray(grid)){
+		return cellBounds(grid as Cell[]);
+	}
 
     let left : number = val(grid,'x'),
         right : number = left + val(grid,'width'),
@@ -571,7 +598,7 @@ export const cellsRange = function( grid: Grid, posStart_columnStart: Position |
         r2 = posStop_columnStop.row;
     }
 
-    var cells = [];
+    const cells:Cell[] = [];
 
     for(; c1 <= c2; c1++){
         for(let r = r1; r<=r2; r++){
