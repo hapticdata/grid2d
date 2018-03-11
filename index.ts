@@ -95,45 +95,13 @@ const shiftCellsDefaults = {
 };
 
 
-
-/**
- * Generate a new grid,
- * @param {Object} [grid]
- * @returns {{
- *      cells         : Array,
- *      x             : Number,
- *      y             : Number,
- *      width         : Number,
- *      height        : Number,
- *      columns       : Number,
- *      rows          : Number,
- *      paddingLeft   : 0,
- *      paddingRight  : 0,
- *      paddingBottom : 0,
- *      paddingTop    : 0
-* }}
- */
- const createGrid = (grid: Object) : Grid =>
-    (<Grid>defaults(grid||{}, gridDefaults));
-
-
-
-const times = function( n : number, fn : Function, arr:Array<any>=[]){
-    for(let i : number = 0; i<n; i++){
-        arr[i] = fn(i, n);
-    }
-    return arr;
-}
-
-
-
 /**
  * Generate the cells for a provided grid
  * @param {{ x, y, columns, rows, width, height }} grid
  * @param {Array} [arr] optionally provide an array to populate
  * @returns {Array}
  */
-export const createCells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
+export const cells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
     let r : number = 0,
         c : number = 0,
         i : number = 0;
@@ -148,7 +116,7 @@ export const createCells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
     if(rowMajor){
         for(r=0; r<grid.rows; r++){
             for(c=0; c<grid.columns; c++){
-                arr[i++] = createCellForPosition(grid, c, r);
+                arr[i++] = cellForPosition(grid, c, r);
             }
         }
         return arr;
@@ -156,7 +124,7 @@ export const createCells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
 
     for(c=0; c<grid.columns; c++){
         for(r=0; r<grid.rows; r++){
-            arr[i++] = createCellForPosition(grid, c, r);
+            arr[i++] = cellForPosition(grid, c, r);
         }
     }
 
@@ -213,8 +181,8 @@ export const cellBounds = function(grid: Grid) : Cell {
  *      height : Number
  *  }}
  */
-export const createCellForIndex = (grid: Grid, index: number, cell?: Cell)=>
-    createCellForPosition(grid, cellPosition(grid, index), cell);
+export const cellForIndex = (grid: Grid, index: number, cell?: Cell)=>
+    cellForPosition(grid, cellPosition(grid, index), cell);
 
 /**
  * create a rectangle at the given column and row
@@ -231,7 +199,7 @@ export const createCellForIndex = (grid: Grid, index: number, cell?: Cell)=>
  *      height : Number
  * }}
  */
-export const createCellForPosition = function( grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell ) : Cell {
+export const cellForPosition = function( grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell ) : Cell {
 
     if( isPosition(c) ){
         //accept { column:Number, row:Number }
@@ -266,7 +234,7 @@ export const createCellForPosition = function( grid: Grid, c: number | Position,
  * }}
  */
 export const closestCell = (grid: Grid, point: Point) : Cell =>
-    createCellForPosition(grid, closestCellPosition(grid, point));
+    cellForPosition(grid, closestCellPosition(grid, point));
 
 /**
  * closest cell `position` to `point`
@@ -559,7 +527,7 @@ export const yForRow = function( grid: Grid, n: number ) : number {
  * @returns {Object|undefined} the cell intersected or undefined
  */
 export const intersectsCell = (grid: Grid, point: Point) : Cell =>
-    createCellForPosition(grid, intersectsCellPosition(grid, point));
+    cellForPosition(grid, intersectsCellPosition(grid, point));
 
 export const intersectsCellPosition = function( grid: Grid, point: Point ) : Position {
 
@@ -569,7 +537,7 @@ export const intersectsCellPosition = function( grid: Grid, point: Point ) : Pos
         for( let row=0; row<grid.rows; row++ ){
 
             //mutate cell instead of creating a new one
-            createCellForPosition(grid, column, row, cell);
+            cellForPosition(grid, column, row, cell);
 
             if(contains(cell, point)){
                 return { column, row }
@@ -590,7 +558,7 @@ export const intersectsCellIndex = (grid: Grid, point: Point) : number =>
  * @param {Number} [rowStop] the second row index
  * @returns {Cell:[]} cells
  */
-export const createCellsBetween = function( grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, rowStart?: number, rowStop?: number ) : Cell[] {
+export const cellsRange = function( grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, rowStart?: number, rowStop?: number ) : Cell[] {
     let c1: number;
     let c2: number;
     let r1: number;
@@ -607,7 +575,7 @@ export const createCellsBetween = function( grid: Grid, posStart_columnStart: Po
 
     for(; c1 <= c2; c1++){
         for(let r = r1; r<=r2; r++){
-            cells.push(createCellForPosition(grid, c1, r));
+            cells.push(cellForPosition(grid, c1, r));
         }
     }
 
@@ -648,7 +616,7 @@ export const shiftCells = function(grid, params ){
     for(c=0; c < cols; c++){
         cellsCache[c] = [];
         for(r=0; r<rows; r++){
-            cellsCache[c][r] = createCellForPosition( grid, c, r );
+            cellsCache[c][r] = cellForPosition( grid, c, r );
         }
     }
 
@@ -671,15 +639,15 @@ export const shiftCells = function(grid, params ){
                 //if we can't wrap it, drop the cell and make a new one
                 if( !params.wrap ){
                     cells.splice( cells.indexOf(cell), 1 );
-                    cell = createCellForPosition(grid, newC, newR);
+                    cell = cellForPosition(grid, newC, newR);
                     cellsToAdd.push(cell);
                 } else {
                     //overwrite the current cell object with new data
-                    createCellForPosition(grid, newC, newR, cell);
+                    cellForPosition(grid, newC, newR, cell);
                 }
             } else {
                 //overwise the current cell object with new data
-                createCellForPosition(grid, newC, newR, cell);
+                cellForPosition(grid, newC, newR, cell);
             }
         }
     }
