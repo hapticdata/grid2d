@@ -1,6 +1,10 @@
+.DS_Store
+*.swp
+.vscode/
 node_modules
 old-test.js
 grids.js
 example
+# only the ts files
 test.js
 index.js

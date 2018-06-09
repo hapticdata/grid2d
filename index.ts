@@ -1,4 +1,4 @@
-import defaults = require("defaults");
+const defaults = require('defaults');
 
 export { defaults };
 
@@ -67,20 +67,30 @@ const gridDefaults= {
 };
 
 
+/**
+ * fill in all parameters of the grid, including defaults
+ * @param g the Grid to fill in with all defaults
+ * @param result optionally provide the object, otherwise a new one is created
+ */
+export function grid(g:Grid, result?:object): Grid {
+	return (<any>Object).assign(result||{}, gridDefaults, g);
+}
 
-export const scale = (grid: Grid, scaleX: number, scaleY: number, scaledGrid: Grid = null) : Grid =>{
+
+const makeScaler = (grid: Grid, scale: number, scaledGrid: Grid)=>
+    (property)=>_isFinite(grid[property]) && (scaledGrid[property] *= scale);
+
+
+export function scale(grid: Grid, scaleX: number, scaleY: number, scaledGrid: Grid = null) : Grid {
     scaledGrid = (<any>Object).assign(scaledGrid || {}, grid);
 
     scaledGrid.width = val(grid, 'width') * scaleX;
     scaledGrid.height = val(grid, 'height') * scaleY;
 
-    const makeScaler = (scale)=>
-        (property)=>_isFinite(grid[property]) && (scaledGrid[property] *= scale);
-
     //scale all the other properties
     //but only if they have already been defined
-    ['x', 'paddingLeft', 'paddingRight'].forEach(makeScaler(scaleX));
-    ['y', 'paddingBottom', 'paddingTop'].forEach(makeScaler(scaleY));
+    ['x', 'paddingLeft', 'paddingRight'].forEach(makeScaler(grid, scaleX, scaledGrid));
+    ['y', 'paddingBottom', 'paddingTop'].forEach(makeScaler(grid, scaleY, scaledGrid));
 
     return scaledGrid;
 }
@@ -97,11 +107,11 @@ const shiftCellsDefaults = {
 
 /**
  * Generate the cells for a provided grid
- * @param {{ x, y, columns, rows, width, height }} grid
- * @param {Array} [arr] optionally provide an array to populate
- * @returns {Array}
+ * @param {Grid} grid
+ * @param {Cell[]} [arr] optionally provide an array to populate
+ * @returns {Cell[]}
  */
-export const cells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
+export function cells( grid: Grid, arr: Cell[] = [] ): Cell[] {
     let r : number = 0,
         c : number = 0,
         i : number = 0;
@@ -129,50 +139,47 @@ export const cells = function( grid: Grid, arr: Cell[] = [] ): Cell[] {
     }
 
     return arr;
-};
+}
 
- function cellBounds(cells:Cell[]): Cell {
+ function cellBounds(cells:Cell[], result?:object): Cell {
 
-	let minX:number = Number.MAX_VALUE;
-	let minY:number = Number.MAX_VALUE;
-	let maxX:number = Number.MIN_VALUE;
-	let maxY:number = Number.MIN_VALUE;
+    let minX:number = Number.MAX_VALUE;
+    let minY:number = Number.MAX_VALUE;
+    let maxX:number = Number.MIN_VALUE;
+    let maxY:number = Number.MIN_VALUE;
 
-	for(let i:number = 0; i<cells.length; i++){
-		const c:Cell = cells[i];
-		const tl:Point = topLeft(c);
-		const br:Point = bottomRight(c);
+    for(let i:number = 0; i<cells.length; i++){
+        const c:Cell = cells[i];
+        const tl:Point = topLeft(c);
+        const br:Point = bottomRight(c);
 
-		minX = Math.min(minX, tl.x, br.x);
-		minY = Math.min(minY, tl.y, br.y);
-		maxX = Math.max(maxX, tl.x, br.x);
-		maxY = Math.max(maxY, tl.y, br.y);
+        minX = Math.min(minX, tl.x, br.x);
+        minY = Math.min(minY, tl.y, br.y);
+        maxX = Math.max(maxX, tl.x, br.x);
+        maxY = Math.max(maxY, tl.y, br.y);
 	}
 
-	return {
-		x: minX,
-		y: minY,
-		width: maxX - minX,
-		height: maxY - minY
-	};
+	const r: any = (<any>result || {});
+
+    r.x = minX;
+    r.y = minY;
+    r.width = maxX - minX;
+	r.height = maxY - minY;
+
+	return r as Cell;
  }
 
 /**
  * Compute the boundaries of the cells provided
- * @param {Object|Array} grid or the cells array
- * @param {Object} [bounds] optionally provide a rect object to be reused
- * @returns {{
- *      x:Number,
- *      y:Number,
- *      width:Number,
- *      height:Number
- * }}
+ * @param {Grid | Cell[]} grid or the cells array
+ * @param {object} [bounds] optionally provide a rect object to be reused
+ * @returns {Cell}
  */
-export const bounds = function(grid: Grid | Cell[]) : Cell {
+export function bounds(grid: Grid | Cell[], result?:object) : Cell {
 
-	if(Array.isArray(grid)){
-		return cellBounds(grid as Cell[]);
-	}
+    if(Array.isArray(grid)){
+        return cellBounds(grid as Cell[], result);
+    }
 
     let left : number = val(grid,'x'),
         right : number = left + val(grid,'width'),
@@ -186,90 +193,77 @@ export const bounds = function(grid: Grid | Cell[]) : Cell {
         bottom -= val(grid,'paddingBottom');
     }
 
-    return {
-        x: left,
-        y: top,
-        width: right - left,
-        height: bottom - top
-    };
-};
+    const r:any = (<any>result || {});
+    r.x = left;
+    r.y = top;
+    r.width = right - left;
+	r.height = bottom - top;
+
+    return r as Cell;
+}
 
 
 /**
- * create a rectangle at the given grid index
- * @param {object} grid
- * @param {Number} index
- * @returns {{
- *      column : Number,
- *      row    : Number,
- *      x      : Number,
- *      y      : Number,
- *      width  : Number,
- *      height : Number
- *  }}
+ * create a Cell at the given grid index
+ * @param {Grid} grid
+ * @param {number} index
+ * @returns {Cell}
  */
-export const cellForIndex = (grid: Grid, index: number, cell?: Cell)=>
+export const cellForIndex = (grid: Grid, index: number, cell?: object) : Cell =>
     cellForPosition(grid, cellPosition(grid, index), cell);
 
 /**
- * create a rectangle at the given column and row
- * @param {Object} grid
- * @param {Number} c column position
- * @param {Number} r row position
- * @param {Object} [cell] optionally mutate an existing object
- * @returns {{
- *      column : Number,
- *      row    : Number,
- *      x      : Number,
- *      y      : Number,
- *      width  : Number,
- *      height : Number
- * }}
+ * create a Cell at the given column and row
+ * @param {Grid} grid
+ * @param {number | Position} c column position
+ * @param {number | Cell} [r] row position
+ * @param {object} [cell] optionally mutate an existing object
+ * @returns {Cell}
  */
-export const cellForPosition = function( grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell ) : Cell {
+export function cellForPosition( grid: Grid, c: number | Position, r?: number | Cell, cell?: object ) : Cell {
 
     if( isPosition(c) ){
         //accept { column:Number, row:Number }
-        cell = (<Cell>r);
+        cell = (<object>r);
         r = (<Position>c).row;
         c = (<Position>c).column;
     }
 
-    cell = cell || { x: 0, y: 0, width: 0, height: 0 };
+    const _cell:Cell = (<Cell>defaults(cell || {}, { x: 0, y: 0, width: 0, height: 0 }));
 
-    cell.x = xForColumn( grid, (<number>c) );
-    cell.y = yForRow( grid, (<number>r) );
-    cell.width = cellWidth( grid );
-    cell.height = cellHeight( grid );
+    _cell.x = xForColumn( grid, (<number>c) );
+    _cell.y = yForRow( grid, (<number>r) );
+    _cell.width = cellWidth( grid );
+    _cell.height = cellHeight( grid );
 
-    return cell;
-};
+    return _cell;
+}
+
+
+export function cell( grid: Grid, i: number | Position, cell?: object): Cell {
+    return isPosition(i) ?
+        cellForPosition(grid, i, cell) :
+        cellForIndex(grid, i, cell);
+}
 
 
 
 /**
  * Find the closest cell to the postion vector
  * @param {Grid} grid
- * @param {Position} pos the position vector
- * @returns {{
- *      x      : Number,
- *      y      : Number,
- *      width  : Number,
- *      height : Number,
- *      column : Number,
- *      rows   : Number
- * }}
+ * @param {Point} pos the point vector
+ * @returns {Cell}
  */
 export const closestCell = (grid: Grid, point: Point) : Cell =>
     cellForPosition(grid, closestCellPosition(grid, point));
 
 /**
  * closest cell `position` to `point`
- * @param {grid} [grid]
- * @param {point} [point]
- * @returns {position}
+ * @param {Grid} grid
+ * @param {Point} point
+ * @returns {Position}
  */
-export const closestCellPosition = function(grid: Grid, point: Point) : Position {
+export function closestCellPosition(grid: Grid, point: Point) : Position {
     let column : number,
         row : number,
         minDistanceX : number = Number.MAX_VALUE,
@@ -292,13 +286,13 @@ export const closestCellPosition = function(grid: Grid, point: Point) : Position
     }
 
     return { column, row };
-};
+}
 
 /**
  * closest cell index to `point`
- * @param {grid} [grid]
- * @param {point} [point]
- * @returns {position}
+ * @param {Grid} grid
+ * @param {Point} point
+ * @returns {number}
  */
 export const closestCellIndex = (grid: Grid, point: Point) : number =>
     cellIndex(grid, closestCellPosition(grid, point));
@@ -306,9 +300,9 @@ export const closestCellIndex = (grid: Grid, point: Point) : number =>
 
 /**
  * Does the grid (or cell) contain this position?
- * @param {{ x, y, width, height }} grid the grid or cell to test
- * @param {{ x, y }} pos the vector of the position
- * @returns {Boolean} true if the point is inside
+ * @param {Cell | Grid} grid the grid or cell to test
+ * @param {Point} pos the vector of the position
+ * @returns {boolean} true if the point is inside
  */
 export const contains = (cell: Cell | Grid, point: Point) : boolean =>
     point.x >= val(cell,'x') && point.x <= val(cell,'x') + val(cell,'width') &&
@@ -317,43 +311,37 @@ export const contains = (cell: Cell | Grid, point: Point) : boolean =>
 
 /**
  * Get the bottom-left vertex
- * @param {{ x, y, height }} grid
- * @returns {{
- *      x : Number,
- *      y : Number
- * }}
+ * @param {Cell | Grid} cell
+ * @returns {Point}
  */
-export const bottomLeft = function(cell: Cell) : Point {
+export function bottomLeft(cell: Cell | Grid) : Point {
     return {
         x: val(cell, 'x'),
         y: val(cell,'y') + val(cell,'height')
     };
-};
+}
 
 /**
  * Get the bottom-right vertex of the grid or cell
- * @param {{ x, y, width, height }} grid the grid or cell
- * @returns {{
- *      x : Number,
- *      y : Number
- * }}
+ * @param {Cell | Grid} cell
+ * @returns {Point}
  */
-export const bottomRight = function(cell: Cell) : Point {
+export function bottomRight(cell: Cell | Grid) : Point {
     return {
         x: val(cell,'x') + val(cell,'width'),
         y: val(cell,'y') + val(cell,'height')
     };
-};
+}
 
 
 /**
  * Get the index of the cell at `c`, `r`
- * @param {Object} grid
- * @param {Number} c the column
- * @param {Number} r the row
- * @returns {Number} index
+ * @param {Grid} grid
+ * @param {number|Position} c the column
+ * @param {number} [r] the row
+ * @returns {number} index
  */
-export const cellIndex = function( grid: Grid, c : number | Position, r?: number ) : number {
+export function cellIndex( grid: Grid, c : number | Position, r?: number ) : number {
     if(isPosition(c)){
         r = (<Position>c).row;
         c = (<Position>c).column;
@@ -364,16 +352,13 @@ export const cellIndex = function( grid: Grid, c : number | Position, r?: number
     }
 
     return (grid.rows * (<number>c)) + (<number>r);
-};
+}
 
 /**
  * Provides the column and row for the provided index
- * @param {{ columns:Number }} grid
- * @param {Number | Cell} i the index, or a Cell
- * @returns {{
- *      column : Number,
- *      row    : Number
- * }}
+ * @param {Grid} grid
+ * @param {number|Cell} i the index, or a Cell
+ * @returns {Position}
  */
 export function cellPosition( grid : Grid, i: number | Cell ) : Position {
     if( i === 0 ) {
@@ -429,94 +414,89 @@ export function cellPosition( grid : Grid, i: number | Cell ) : Position {
         row: Math.floor(p % rows ),
         column: Math.floor(p / rows)
     };
-};
+}
 
 /**
  * Get the width for a cell in the grid
- * @param {Object} grid
- * @returns {Number} width
+ * @param {Grid} grid
+ * @returns {number} width
  */
-export const cellWidth = function(grid: Grid) : number {
-    var pl = val(grid,'paddingLeft'),
-        pr = val(grid,'paddingRight'),
-        totalPadding = (pl+pr) * grid.columns;
+export function cellWidth(grid: Grid) : number {
+    const pl:number = val(grid,'paddingLeft'),
+        pr:number = val(grid,'paddingRight');
+
+    let totalPadding:number = (pl+pr) * grid.columns;
     if( !val(grid,'outerPadding') ){
         totalPadding -= pl + pr;
     }
+
     return (val(grid,'width') - totalPadding)  / grid.columns;
-};
+}
 
 /**
  * Get the height for a cell in the grid
- * @param {Object} grid
- * @returns {Number} height
+ * @param {Grid} grid
+ * @returns {number} height
  */
-export const cellHeight = function(grid : Grid) : number {
-    var pt = val(grid,'paddingTop'),
-        pb = val(grid,'paddingBottom'),
-        totalPadding = (pt+pb) * grid.rows;
+export function cellHeight(grid : Grid) : number {
+    const pt:number = val(grid,'paddingTop'),
+        pb:number = val(grid,'paddingBottom');
+
+    let totalPadding:number = (pt+pb) * grid.rows;
     if( !val(grid,'outerPadding') ){
         totalPadding -= pt + pb;
     }
+
     return (val(grid,'height') - totalPadding) / grid.rows;
-};
+}
 
 /**
  * Center the center vector of the grid or cell
- * @param {{ x, y, width, height }} grid the grid or cell to get center of
- * @returns {{
- *      x : Number,
- *      y : Number
- * }}
+ * @param { Cell | Grid } cell the grid or cell to get center of
+ * @returns {Point}
  */
-export const center = function(cell: Cell) : Point {
+export function center(cell: Cell | Grid) : Point {
     return {
         x: val(cell,'x') + val(cell,'width') / 2,
         y: val(cell,'y') + val(cell,'height') / 2
     };
-};
+}
 
 
 /**
  * Get the vector for the top-left vertex
- * @param {{ x, y, width }} grid
- * @returns {{
- *      x:Number,
- *      y:Number
- * }}
+ * @param {Cell | Grid} cell
+ * @returns {Point}
  */
-export const topLeft = function( cell: Cell ) : Point {
+export function topLeft( cell: Cell | Grid ) : Point {
     return {
         x: val(cell,'x'),
         y: val(cell,'y')
     };
-};
+}
 
 /**
  * Get the vector for the top-right vertex
- * @param {{ x, y, width }} grid
- * @returns {{
- *      x:Number,
- *      y:Number
- * }}
+ * @param {Cell | Grid} cell
+ * @returns {Point}
  */
-export const topRight = function( cell: Cell ) : Point {
+export function topRight( cell: Cell | Grid ) : Point {
     return {
         x: val(cell,'x') + val(cell,'width'),
         y: val(cell,'y')
     };
-};
+}
 
 /**
  * Get the x-position for the `nth` column of the grid
- * @param {Object} grid
- * @param {Number} n the column
- * @returns {Number} x
+ * @param {Grid} grid
+ * @param {number} n the column
+ * @returns {number} x
  */
-export const xForColumn = function( grid: Grid, n: number ) : number {
-    const pl = val(grid,'paddingLeft'),
-        pr = val(grid,'paddingRight'),
-        paddingSum = ( (pl+pr) * n );
+export function xForColumn( grid: Grid, n: number ) : number {
+    const pl:number = val(grid,'paddingLeft'),
+        pr:number = val(grid,'paddingRight'),
+        paddingSum:number = ( (pl+pr) * n );
 
     let x = val(grid,'x') + pl + ( cellWidth(grid) * n ) + paddingSum;
 
@@ -525,18 +505,18 @@ export const xForColumn = function( grid: Grid, n: number ) : number {
     }
 
     return x;
-};
+}
 
 /**
  * Get the y-position for the `nth` row of the grid
- * @param {Object} grid
- * @param {Number} n the row
- * @returns {Number} y
+ * @param {Grid} grid
+ * @param {number} n the row
+ * @returns {number} y
  */
-export const yForRow = function( grid: Grid, n: number ) : number {
-    const pt = val(grid,'paddingTop'),
-        pb = val(grid,'paddingBottom'),
-        paddingSum = ( (pt+pb) * n );
+export function yForRow( grid: Grid, n: number ) : number {
+    const pt:number = val(grid,'paddingTop'),
+        pb:number = val(grid,'paddingBottom'),
+        paddingSum:number = ( (pt+pb) * n );
 
     let y = val(grid,'y') + pt + ( cellHeight(grid) * n ) + paddingSum;
 
@@ -545,24 +525,35 @@ export const yForRow = function( grid: Grid, n: number ) : number {
     }
 
     return y;
-};
+}
 
 /**
  * Get the cell that is intersected by the provided point, undefined if none
- * @param {Object} grid
- * @param {{ x,y }} point the point vector
- * @returns {Object|undefined} the cell intersected or undefined
+ * @param {Grid | Cell[]} grid
+ * @param {Point} point the point vector
+ * @returns {Cell|undefined} the cell intersected or undefined
  */
-export const intersectsCell = (grid: Grid, point: Point) : Cell =>
-    cellForPosition(grid, intersectsCellPosition(grid, point));
+export const intersectsCell = (grid: Grid | Cell[], point: Point) : Cell =>
+	Array.isArray(grid) ?
+	(<Cell[]>grid)[intersectsCellIndexFromArray(grid as Cell[], point)] :
+	cellForPosition(grid, intersectsCellPosition(grid, point));
 
-export const intersectsCellPosition = function( grid: Grid, point: Point ) : Position {
 
-    var cell = { x: 0, y: 0, width: 0, height: 0 };
+function intersectsCellIndexFromArray( cells: Cell[], point: Point) : number {
+	for(let i:number = 0; i< cells.length; i++){
+		const cell:Cell = cells[i];
+		if(contains(cell, point)){
+			return i;
+		}
+    }
+    return -1;
+}
+
+export function intersectsCellPosition( grid: Grid, point: Point ) : Position {
+    const cell:Cell = { x: 0, y: 0, width: 0, height: 0 };
 
     for( let column=0; column<grid.columns; column++ ){
         for( let row=0; row<grid.rows; row++ ){
-
             //mutate cell instead of creating a new one
             cellForPosition(grid, column, row, cell);
 
@@ -571,9 +562,11 @@ export const intersectsCellPosition = function( grid: Grid, point: Point ) : Pos
             }
         }
     }
-};
+}
 
-export const intersectsCellIndex = (grid: Grid, point: Point) : number =>
+export const intersectsCellIndex = (grid: Grid | Cell[], point: Point) : number =>
+    Array.isArray(grid) ?
+    intersectsCellIndexFromArray(grid as Cell[], point) :
     cellIndex(grid, intersectsCellPosition(grid, point));
 
 /**
@@ -585,7 +578,7 @@ export const intersectsCellIndex = (grid: Grid, point: Point) : number =>
  * @param {Number} [rowStop] the second row index
  * @returns {Cell:[]} cells
  */
-export const cellsRange = function( grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, rowStart?: number, rowStop?: number ) : Cell[] {
+export function cellsRange(grid: Grid, posStart_columnStart: Position|number, posStop_columnStop: Position|number, rowStart?: number, rowStop?: number) : Cell[] {
     let c1: number;
     let c2: number;
     let r1: number;
@@ -600,15 +593,38 @@ export const cellsRange = function( grid: Grid, posStart_columnStart: Position |
 
     const cells:Cell[] = [];
 
-    for(; c1 <= c2; c1++){
-        for(let r = r1; r<=r2; r++){
-            cells.push(cellForPosition(grid, c1, r));
+    if(grid.rowMajor){
+        for(let c=c1; c <= c2; c++){
+            for(let r = r1; r<=r2; r++){
+                cells.push(cellForPosition(grid, c, r));
+            }
         }
+    } else {
+        for(let r = r1; r<=r2; r++){
+            for(let c=c1; c <= c2; c++){
+                cells.push(cellForPosition(grid, c, r));
+            }
+        }
+
     }
 
     return cells;
-};
+}
 
+
+/**
+ * Merge the given Cell[] or Grid with `posStart` and `posStop` provided into a single Cell
+ * @param {Grid | Cell[]} grid
+ * @param {Position} [posStart]
+ * @param {Position} [posStop]
+ * @param {object} [result]
+ * @returns {Cell}
+ */
+export function cellsMerged(grid: Grid | Cell[], posStart?:Position, posStop?:Position, result?:object): Cell {
+    return Array.isArray(grid) ?
+        cellBounds(grid as Cell[], result) :
+        cellBounds([ cellForPosition(grid, posStart), cellForPosition(grid, posStop) ], result);
+}
 
 
 
@@ -621,7 +637,7 @@ export const cellsRange = function( grid: Grid, posStart_columnStart: Position |
  * @param {Boolean} [params.wrap] true if cells pushed off should be wrapped
  * @returns {Array} cells
  */
-export const shiftCells = function(grid, params ){
+export function shiftCells(grid, params ){
     if( typeof params !== 'object' ){
         return grid;
     }
@@ -686,16 +702,16 @@ export const shiftCells = function(grid, params ){
     }
 
     return grid;
-};
+}
 
 /**
  * Comparator to sort an array of cells by
  * their position within the grid
- * @param {{ column:Number, row:Number}} a
- * @param {{ column:Nunber, row:Number}} b
- * @returns {Number}
+ * @param {Position} a
+ * @param {Position} b
+ * @returns {number}
  */
-export const sortByGridPosition = function( a: Position, b: Position ) : number {
+export function sortByGridPosition( a: Position, b: Position ) : number {
     var ac = a.column,
         bc = b.column,
         ar = a.row,
@@ -711,6 +727,6 @@ export const sortByGridPosition = function( a: Position, b: Position ) : number 
         return 1;
     }
     return 0;
-};
+}
 
 

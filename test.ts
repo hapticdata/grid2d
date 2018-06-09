@@ -97,8 +97,8 @@ test('should generate columns * rows cells', function(t) {
 		rows: 5
 	};
 
-	const cells: Cell[] = grid2d.createCells(grid);
-	t.equals(cells.length, grid.columns * grid.rows, 'createCells length should each columns*rows');
+	const cells: Cell[] = grid2d.cells(grid);
+	t.equals(cells.length, grid.columns * grid.rows, 'cells length should each columns*rows');
 
 	const cell = cells[grid2d.cellIndex(grid, 3, 2)];
 	t.ok(cell.x === grid.width / grid.columns * 3 && cell.y === grid.height / grid.rows * 2, 'cellIndex');
@@ -159,10 +159,10 @@ test('cellPosition', (t)=>{
 	t.equals(p.column, 2, 'cellPosition column correct');
 	t.equals(p.row, 1, 'cellPosition row correct');
 
-	const cell = grid2d.createCellForPosition(grid, 3, 1);
+	const cell = grid2d.cellForPosition(grid, 3, 1);
 	p = grid2d.cellPosition(grid, cell);
-	t.equals(p.column, 3, 'createCellForPosition creates cell at correct position');
-	t.equals(p.row, 1, 'createCellForPosition creates cell at correct position');
+	t.equals(p.column, 3, 'cellForPosition creates cell at correct position');
+	t.equals(p.row, 1, 'cellForPosition creates cell at correct position');
 
 
 	grid.rowMajor = false;
@@ -172,3 +172,43 @@ test('cellPosition', (t)=>{
 
 });
 
+
+test('cell', function(t){
+	t.plan(5);
+
+	const g: Grid = { columns: 6, rows: 4 };
+
+	const o:object = {};
+	let result:Cell = grid2d.cell(g, 4, o)
+	t.equal(o, result, 'cell with index, should be the original object returned, but with Cell data');
+	t.ok(result.x >= 0 && result.y >= 0 && result.width > 0 && result.height > 0, 'cell with index, should be filled in with Cell properties');
+
+	result = grid2d.cell(g, { column: 1, row: 2}, o);
+	t.equal(o, result, 'cell with Position, should be the original object returned, but with Cell data');
+	t.ok(result.x >= 0 && result.y >= 0 && result.width > 0 && result.height > 0, 'cell with Position, should be filled in with Cell properties');
+
+
+	result = grid2d.cell(g, { column: 1, row: 2});
+	t.ok(result.x >= 0 && result.y >= 0 && result.width > 0 && result.height > 0, 'cell should filled new object with Cell properties');
+});
+
+
+test('bounds', function(t){
+
+	t.plan(4);
+
+	const g: Grid = { columns: 4, rows: 4 };
+
+	const o:object = {};
+	const cells:Cell[] = grid2d.cellsRange(g, { column: 0, row: 0 }, { column: 2, row: 2 });
+	let result:Cell = grid2d.bounds(cells, o);
+
+	t.equal(o, result, 'bounds with Cell[], should mutate provided object');
+	t.ok(result.x >= 0 && result.y >= 0 && result.width > 0 && result.height > 0, 'bounds with Cell[] should fill with Cell properties');
+
+
+	result = grid2d.bounds(g, o);
+	t.equal(o, result, 'bounds with Grid, should mutate provided object');
+	t.ok(result.x === 0 && result.y === 0 && result.width === 1 && result.height === 1, `bounds with Grid should fill with Cell properties`);
+
+});

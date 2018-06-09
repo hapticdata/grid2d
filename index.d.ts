@@ -1,3 +1,5 @@
+import defaults = require("defaults");
+export { defaults };
 export interface Point {
     x?: number;
     y?: number;
@@ -27,7 +29,7 @@ export declare const scale: (grid: Grid, scaleX: number, scaleY: number, scaledG
  * @param {Array} [arr] optionally provide an array to populate
  * @returns {Array}
  */
-export declare const createCells: (grid: Grid, arr?: Cell[]) => Cell[];
+export declare const cells: (grid: Grid, arr?: Cell[]) => Cell[];
 /**
  * Compute the boundaries of the cells provided
  * @param {Object|Array} grid or the cells array
@@ -39,7 +41,7 @@ export declare const createCells: (grid: Grid, arr?: Cell[]) => Cell[];
  *      height:Number
  * }}
  */
-export declare const cellBounds: (grid: Grid) => Cell;
+export declare const bounds: (grid: Grid | Cell[]) => Cell;
 /**
  * create a rectangle at the given grid index
  * @param {object} grid
@@ -53,7 +55,7 @@ export declare const cellBounds: (grid: Grid) => Cell;
  *      height : Number
  *  }}
  */
-export declare const createCellForIndex: (grid: Grid, index: number, cell?: Cell) => Cell;
+export declare const cellForIndex: (grid: Grid, index: number, cell?: Cell) => Cell;
 /**
  * create a rectangle at the given column and row
  * @param {Object} grid
@@ -69,7 +71,7 @@ export declare const createCellForIndex: (grid: Grid, index: number, cell?: Cell
  *      height : Number
  * }}
  */
-export declare const createCellForPosition: (grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell) => Cell;
+export declare const cellForPosition: (grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell) => Cell;
 /**
  * Find the closest cell to the postion vector
  * @param {Grid} grid
@@ -212,7 +214,8 @@ export declare const intersectsCellIndex: (grid: Grid, point: Point) => number;
  * @param {Number} [rowStop] the second row index
  * @returns {Cell:[]} cells
  */
-export declare const createCellsBetween: (grid: Grid, posStart_columnStart: number | Position, posStop_columnStop: number | Position, rowStart: number, rowStop: number) => Cell[];
+export declare const cellsRange: (grid: Grid, posStart_columnStart: number | Position, posStop_columnStop: number | Position, rowStart?: number, rowStop?: number) => Cell[];
+export declare const cellsMerged: (grid: Grid, posStart: Position, posStop: Position) => Cell;
 /**
  * shift all cells over
  * @param {Object} grid

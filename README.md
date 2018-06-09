@@ -52,6 +52,78 @@ const cells: Cell[] = grid2d.createCellsBetween({ columns: 4, rows: 5 }, { colum
 
 ## API
 
+### Interfaces
+
+```ts
+interface Point {
+    x?: number;
+    y?: number;
+}
+
+interface Cell extends Point {
+    width?: number;
+    height?: number;
+}
+
+interface Grid extends Cell {
+    columns: number;
+    rows: number;
+    paddingLeft?: number;
+    paddingRight?: number;
+    paddingTop?: number;
+    paddingBottom?: number;
+    outerPadding?: boolean;
+    rowMajor?:boolean;
+}
+
+interface Position {
+    column: number;
+    row: number;
+}
+
+```
+
+### Grid Re-work
+
+`bounds(cells:Cell[]| Grid) => Cell;`
+
+`cells((grid: Grid, arr?: Cell[]) => Cell[];`
+
+`cellsRange(grid: Grid, posStart_columnStart: Position | number, posStop_columnStop: Position | number, [rowStart: number, rowStop: number]) => Cell[];`
+
+`cellForIndex(grid: Grid, index: number, cell?: Cell) => Cell;`
+
+`cellForPosition(grid: Grid, c: number | Position, r?: number | Cell, cell?: Cell) => Cell;`
+
+`closestCell(grid: Grid, point: Point) => Cell;`
+
+`closestCellPosition(grid: Grid, point: Point) => Position;`
+
+`closestCellIndex(grid: Grid, point: Point) => number;`
+
+`cellIndex(grid: Grid, c: number | Position, r?: number) => number;`
+
+`cellPosition(grid: Grid, i: number | Cell): Position;`
+
+`cellWidth(grid: Grid) => number;`
+
+`cellHeight(grid: Grid) => number;`
+
+`xForColumn(grid: Grid, n: number) => number;`
+
+`yForRow(grid: Grid, n: number) => number;`
+
+`intersectsCell(grid: Grid, point: Point) => Cell;`
+
+`intersectsCellPosition(grid: Grid, point: Point) => Position;`
+
+`intersectsCellIndex(grid: Grid, point: Point) => number;`
+
+`scale(grid: Grid, scaleX: number, scaleY: number, scaledGrid?: Grid) => Grid;`
+
+
+### Grid
+
 `cellBounds(grid: Grid) => Cell;`
 
 `createCells((grid: Grid, arr?: Cell[]) => Cell[];`
@@ -68,12 +140,6 @@ const cells: Cell[] = grid2d.createCellsBetween({ columns: 4, rows: 5 }, { colum
 
 `closestCellIndex(grid: Grid, point: Point) => number;`
 
-`contains(cell: Cell | Grid, point: Point) => boolean;`
-
-`bottomLeft(cell: Cell) => Point;`
-
-`bottomRight(cell: Cell) => Point;`
-
 `cellIndex(grid: Grid, c: number | Position, r?: number) => number;`
 
 `cellPosition(grid: Grid, i: number | Cell): Position;`
@@ -81,12 +147,6 @@ const cells: Cell[] = grid2d.createCellsBetween({ columns: 4, rows: 5 }, { colum
 `cellWidth(grid: Grid) => number;`
 
 `cellHeight(grid: Grid) => number;`
-
-`center(cell: Cell) => Point;`
-
-`topLeft(cell: Cell) => Point;`
-
-`topRight(cell: Cell) => Point;`
 
 `xForColumn(grid: Grid, n: number) => number;`
 
@@ -100,7 +160,28 @@ const cells: Cell[] = grid2d.createCellsBetween({ columns: 4, rows: 5 }, { colum
 
 `scale(grid: Grid, scaleX: number, scaleY: number, scaledGrid?: Grid) => Grid;`
 
+
+
+### Cell
+
+`contains(cell: Cell | Grid, point: Point) => boolean;`
+
+`bottomLeft(cell: Cell) => Point;`
+
+`bottomRight(cell: Cell) => Point;`
+
+`center(cell: Cell) => Point;`
+
+`topLeft(cell: Cell) => Point;`
+
+`topRight(cell: Cell) => Point;`
+
+
+
 `shiftCells(grid: any, params: any) => any;`
+
+
+### Position
 
 `sortByGridPosition(a: Position, b: Position) => number;`
 
