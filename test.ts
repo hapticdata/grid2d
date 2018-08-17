@@ -212,3 +212,101 @@ test('bounds', function(t){
 	t.ok(result.x === 0 && result.y === 0 && result.width === 1 && result.height === 1, `bounds with Grid should fill with Cell properties`);
 
 });
+
+test('cellsIntersect', function(t){
+
+    t.plan(4);
+
+    const a:Cell = { x: 0, y: 0, width: 10, height: 10 };
+    const b:Cell = { x: 3, y: -3, width: 4, height: 20 }
+
+
+    t.ok(grid2d.cellsIntersect(a, b), 'should intersect with y < and height >');
+    t.ok(grid2d.cellsIntersect(b, a), 'order shouldnt matter');
+
+
+    a.x = 100;
+    t.notOk(grid2d.cellsIntersect(a, b), 'should not intersect, a.x is too great');
+
+    a.x = 0;
+    b.height = 1;
+    t.notOk(grid2d.cellsIntersect(a, b), 'should not intersect, b height is too little');
+
+});
+
+test('isInRange', function(t){
+
+    t.plan(4);
+
+
+    const grid : Grid = { columns: 4, rows: 6 };
+
+    const a : Position = { column: 1, row: 0 };
+    const b : Position = { column: 2, row: 4 };
+
+    t.ok(grid2d.isInRange({ column: 1, row: 2 }, a, b), 'should be in range');
+    t.ok(grid2d.isInRange({ column: 1, row: 0 }, a, b), 'should be in range');
+    t.notOk(grid2d.isInRange({ column: 0, row: 2 }, a, b), 'should not be in range');
+    t.notOk(grid2d.isInRange({ column: 1, row: 5 }, a, b), 'should not be in range');
+6
+});
+
+test('numCellsInRange', function(t){
+    t.plan(2);
+
+    let v = grid2d.numCellsInRange({ column: 2, row: 0 }, { column: 4, row: 6 });
+    t.equals(v, 21, 'should be 21 cells');
+
+    v = grid2d.numCellsInRange({ column: 5, row: 4 }, { column: 3, row: 1    });
+    t.equals(v, 12, 'should be 12 cells');
+});
+
+
+test('cellsRange', function(t){
+    t.plan(1);
+
+    const a:Position = { column: 1, row: 0 };
+    const b:Position = { column: 3, row: 4 };
+    const num = grid2d.numCellsInRange(a, b);
+
+    const cells = grid2d.cellsRange({ columns: 4, rows: 4 }, a, b);
+
+    t.equals(cells.length, num, 'should generate number of cells as numCellsInRange returns');
+});
+
+
+test('equals', function(t){
+
+    t.plan(4);
+
+    const a:Grid = {
+        columns: 4,
+        rows: 4,
+        width: 10,
+        paddingLeft: 5,
+        outerPadding: false
+    };
+
+    const b:Grid = (<any>Object).assign({}, a);
+
+
+    t.ok( grid2d.equals(a, b), 'should be equal grids');
+    b.paddingRight = 10;
+    t.notOk( grid2d.equals(a, b), 'should not be equal, paddingRight is different');
+
+
+    const ca:Cell = {
+        x: 10,
+        y: 10,
+        width: 100,
+        height: 100
+    };
+
+    const cb:Cell = (<any>Object).assign({}, ca);
+
+    t.ok(grid2d.equals(ca, cb), 'should be equal cells');
+
+    cb.x = 11;
+    t.notOk(grid2d.equals(ca, cb), 'should not be equal, x is different');
+
+});

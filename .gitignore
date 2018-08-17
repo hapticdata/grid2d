@@ -5,6 +5,8 @@ node_modules
 old-test.js
 grids.js
 example
+package-lock.json
 # only the ts files
 test.js
 index.js
+readme/

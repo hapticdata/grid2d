@@ -176,6 +176,8 @@ interface Position {
 
 `topRight(cell: Cell) => Point;`
 
+`cellsIntersect(a: Cell, b:Cell) => boolean;`
+
 
 
 `shiftCells(grid: any, params: any) => any;`

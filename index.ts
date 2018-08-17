@@ -40,6 +40,9 @@ const val = (grid: Object, prop: string) : any =>
 const isPosition = (c: any) : c is Position =>
     typeof c === 'object' && typeof c.column === 'number';
 
+const isGrid = (g:any) : g is Grid =>
+    typeof g.columns === 'number' && typeof g.rows === 'number';
+
 
 /**
  * Module for generating uniform grids.
@@ -74,6 +77,28 @@ const gridDefaults= {
  */
 export function grid(g:Grid, result?:object): Grid {
 	return (<any>Object).assign(result||{}, gridDefaults, g);
+}
+
+const equalCells = (a:Cell, b:Cell):boolean =>
+    a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+
+export function equals(a:Cell, b:Cell):boolean {
+    if(!equalCells(a, b)){
+        return false;
+    } else if(!isGrid(a) || !isGrid(b)){
+        return true;
+    }
+
+    //its a grid
+    return a.columns === b.columns &&
+        a.rows === b.rows &&
+        a.paddingLeft === b.paddingLeft &&
+        a.paddingRight === b.paddingRight &&
+        a.paddingTop === b.paddingTop &&
+        a.paddingBottom === b.paddingBottom &&
+        a.outerPadding === b.outerPadding &&
+        a.rowMajor === b.rowMajor;
+
 }
 
 
@@ -299,7 +324,7 @@ export const closestCellIndex = (grid: Grid, point: Point) : number =>
 
 
 /**
- * Does the grid (or cell) contain this position?
+ * Does the grid (or cell) contain this point?
  * @param {Cell | Grid} grid the grid or cell to test
  * @param {Point} pos the vector of the position
  * @returns {boolean} true if the point is inside
@@ -307,6 +332,7 @@ export const closestCellIndex = (grid: Grid, point: Point) : number =>
 export const contains = (cell: Cell | Grid, point: Point) : boolean =>
     point.x >= val(cell,'x') && point.x <= val(cell,'x') + val(cell,'width') &&
     point.y >= val(cell,'y') && point.y <= val(cell,'y') + val(cell,'height');
+
 
 
 /**
@@ -450,6 +476,8 @@ export function cellHeight(grid : Grid) : number {
     return (val(grid,'height') - totalPadding) / grid.rows;
 }
 
+
+
 /**
  * Center the center vector of the grid or cell
  * @param { Cell | Grid } cell the grid or cell to get center of
@@ -526,6 +554,24 @@ export function yForRow( grid: Grid, n: number ) : number {
 
     return y;
 }
+
+
+/**
+ * Do the two provided cells intersect each other?
+ * @param a
+ * @param b
+ * @returns true if they intersect
+ */
+export function cellsIntersect(a:Cell, b:Cell) : boolean {
+    const ax2 = a.x + a.width;
+    const ay2 = a.y + a.height;
+
+    const bx2 = b.x + b.width;
+    const by2 = b.y + b.height;
+
+    return a.x < bx2 && ax2 > b.x &&
+        a.y < by2 && ay2 > b.y;
+};
 
 /**
  * Get the cell that is intersected by the provided point, undefined if none
@@ -609,6 +655,47 @@ export function cellsRange(grid: Grid, posStart_columnStart: Position|number, po
     }
 
     return cells;
+}
+
+
+const isLessOrEqual = (a:Position, b:Position): boolean =>
+    a.column <= b.column && a.row <= b.row;
+
+const isValidRange = (a:Position, b:Position): boolean =>
+    isLessOrEqual(a, b) || isLessOrEqual(b, a);
+
+const rangeComparator = (a:Position, b:Position)=>
+    isLessOrEqual(a, b) ? 1 : -1;
+
+const sortRangeTuple = (a:Position, b:Position): Position[] =>
+    isLessOrEqual(a, b) ? [a, b] : [b, a];
+
+
+/**
+ * Is the position within the provided range? (inclusive of maximum range)
+ * @param v the position to test
+ * @param a minimum cell boundary
+ * @param b maximum cell boundary
+ */
+export function isInRange({column, row }:Position, a:Position, b:Position): boolean {
+    const minX = Math.min(a.column, b.column);
+    const maxX = Math.max(a.column, b.column);
+    const minY = Math.min(a.row, b.row);
+    const maxY = Math.max(a.row, b.row);
+    return column >= minX && column <= maxX && row >= minY && row <= maxY;
+}
+
+/**
+ * number of cells that exist within the provided boundary positions. (inclusive of maximum range)
+ * @param a cell boundary
+ * @param b  cell boundary
+ */
+export function numCellsInRange(a:Position, b:Position): number {
+    const minX = Math.min(a.column, b.column);
+    const maxX = Math.max(a.column, b.column);
+    const minY = Math.min(a.row, b.row);
+    const maxY = Math.max(a.row, b.row);
+    return ((maxX-minX)+1) * ((maxY-minY)+1);
 }
 
 
