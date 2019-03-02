@@ -3,18 +3,18 @@ const defaults = require('defaults');
 export { defaults };
 
 export interface Point {
-    x?: number;
-    y?: number;
+    x: number;
+    y: number;
 }
 
 
 export interface Cell extends Point {
-    width?: number;
-    height?: number;
+    width: number;
+    height: number;
 }
 
 
-export interface Grid extends Cell {
+export interface Grid extends Partial<Cell> {
     columns: number;
     rows: number;
     paddingLeft?: number;
@@ -24,6 +24,7 @@ export interface Grid extends Cell {
     outerPadding?: boolean;
     rowMajor?:boolean;
 }
+
 
 
 export interface Position {
@@ -79,10 +80,10 @@ export function grid(g:Grid, result?:object): Grid {
 	return (<any>Object).assign(result||{}, gridDefaults, g);
 }
 
-const equalCells = (a:Cell, b:Cell):boolean =>
+const equalCells = (a: Partial<Cell>, b: Partial<Cell>):boolean =>
     a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 
-export function equals(a:Cell, b:Cell):boolean {
+export function equals(a: Partial<Cell>, b: Partial<Cell>):boolean {
     if(!equalCells(a, b)){
         return false;
     } else if(!isGrid(a) || !isGrid(b)){
@@ -245,7 +246,7 @@ export const cellForIndex = (grid: Grid, index: number, cell?: object) : Cell =>
  * @param {object} [cell] optionally mutate an existing object
  * @returns {Cell}
  */
-export function cellForPosition( grid: Grid, c: number | Position, r?: number | Cell, cell?: object ) : Cell {
+export function cellForPosition( grid: Grid, c: number | Position, r?: number | Partial<Cell>, cell?: object ) : Cell {
 
     if( isPosition(c) ){
         //accept { column:Number, row:Number }
@@ -329,7 +330,7 @@ export const closestCellIndex = (grid: Grid, point: Point) : number =>
  * @param {Point} pos the vector of the position
  * @returns {boolean} true if the point is inside
  */
-export const contains = (cell: Cell | Grid, point: Point) : boolean =>
+export const contains = (cell: Partial<Cell> | Grid, point: Point) : boolean =>
     point.x >= val(cell,'x') && point.x <= val(cell,'x') + val(cell,'width') &&
     point.y >= val(cell,'y') && point.y <= val(cell,'y') + val(cell,'height');
 
@@ -340,7 +341,7 @@ export const contains = (cell: Cell | Grid, point: Point) : boolean =>
  * @param {Cell | Grid} cell
  * @returns {Point}
  */
-export function bottomLeft(cell: Cell | Grid) : Point {
+export function bottomLeft(cell: Partial<Cell> | Grid) : Point {
     return {
         x: val(cell, 'x'),
         y: val(cell,'y') + val(cell,'height')
@@ -352,7 +353,7 @@ export function bottomLeft(cell: Cell | Grid) : Point {
  * @param {Cell | Grid} cell
  * @returns {Point}
  */
-export function bottomRight(cell: Cell | Grid) : Point {
+export function bottomRight(cell: Partial<Cell> | Grid) : Point {
     return {
         x: val(cell,'x') + val(cell,'width'),
         y: val(cell,'y') + val(cell,'height')
@@ -386,7 +387,7 @@ export function cellIndex( grid: Grid, c : number | Position, r?: number ) : num
  * @param {number|Cell} i the index, or a Cell
  * @returns {Position}
  */
-export function cellPosition( grid : Grid, i: number | Cell ) : Position {
+export function cellPosition( grid : Grid, i: number | Partial<Cell> ) : Position {
     if( i === 0 ) {
         return {
             column: 0,
@@ -397,7 +398,7 @@ export function cellPosition( grid : Grid, i: number | Cell ) : Position {
 
     //if first param is a Grid and second param is a Cell
     if(typeof i === 'object' && typeof grid === 'object'){
-        const cell = <Cell>i;
+        const cell = i as Partial<Cell>;
         const g = <Grid>grid;
 
         let column = -1;
@@ -405,7 +406,6 @@ export function cellPosition( grid : Grid, i: number | Cell ) : Position {
         //its a cell, find the the column and row for it
         for(let c : number = 0; c < g.columns; c++){
             if(xForColumn(grid, c) === cell.x){
-                console.log(`column ${c}`)
                 column = c;
                 break;
             }
@@ -483,7 +483,7 @@ export function cellHeight(grid : Grid) : number {
  * @param { Cell | Grid } cell the grid or cell to get center of
  * @returns {Point}
  */
-export function center(cell: Cell | Grid) : Point {
+export function center(cell: Partial<Cell> | Grid) : Point {
     return {
         x: val(cell,'x') + val(cell,'width') / 2,
         y: val(cell,'y') + val(cell,'height') / 2
@@ -496,7 +496,7 @@ export function center(cell: Cell | Grid) : Point {
  * @param {Cell | Grid} cell
  * @returns {Point}
  */
-export function topLeft( cell: Cell | Grid ) : Point {
+export function topLeft( cell: Partial<Cell> | Grid ) : Point {
     return {
         x: val(cell,'x'),
         y: val(cell,'y')
@@ -508,7 +508,7 @@ export function topLeft( cell: Cell | Grid ) : Point {
  * @param {Cell | Grid} cell
  * @returns {Point}
  */
-export function topRight( cell: Cell | Grid ) : Point {
+export function topRight( cell: Partial<Cell> | Grid ) : Point {
     return {
         x: val(cell,'x') + val(cell,'width'),
         y: val(cell,'y')
@@ -562,7 +562,7 @@ export function yForRow( grid: Grid, n: number ) : number {
  * @param b
  * @returns true if they intersect
  */
-export function cellsIntersect(a:Cell, b:Cell) : boolean {
+export function cellsIntersect(a: Cell, b: Cell) : boolean {
     const ax2 = a.x + a.width;
     const ay2 = a.y + a.height;
 
