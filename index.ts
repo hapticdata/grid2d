@@ -13,19 +13,28 @@ export interface Cell extends Point {
     height: number;
 }
 
-
-export interface Grid extends Partial<Cell> {
+/**
+ * A CompleteGrid is a grid where all properties have values,
+ * this is rarely necessary, but can be returned by a function
+ */
+export interface CompleteGrid extends Cell {
     columns: number;
     rows: number;
-    paddingLeft?: number;
-    paddingRight?: number;
-    paddingTop?: number;
-    paddingBottom?: number;
-    outerPadding?: boolean;
-    rowMajor?:boolean;
+    paddingLeft: number;
+    paddingRight: number;
+    paddingTop: number;
+    paddingBottom: number;
+    outerPadding: boolean;
+    rowMajor:boolean;
 }
 
-
+/**
+ * A Grid only must have columns and rows, the rest are optional
+ */
+export interface Grid extends Partial<CompleteGrid> {
+    columns: number;
+    rows: number;
+}
 
 export interface Position {
     column: number;
@@ -55,7 +64,7 @@ const isGrid = (g:any) : g is Grid =>
 // the grid `struct`
 //the defaults of every grid,
 //only `{ columns, rows }` is required for any operation
-const gridDefaults= {
+const gridDefaults: CompleteGrid = {
     columns        : NaN,
     rows           : NaN,
     x              : 0,
@@ -76,7 +85,7 @@ const gridDefaults= {
  * @param g the Grid to fill in with all defaults
  * @param result optionally provide the object, otherwise a new one is created
  */
-export function grid(g:Grid, result?:object): Grid {
+export function grid(g:Grid, result?:object): CompleteGrid {
 	return (<any>Object).assign(result||{}, gridDefaults, g);
 }
 
@@ -167,7 +176,7 @@ export function cells( grid: Grid, arr: Cell[] = [] ): Cell[] {
     return arr;
 }
 
- function cellBounds(cells:Cell[], result?:object): Cell {
+ function cellBounds(cells:Partial<Cell>[], result?:object): Cell {
 
     let minX:number = Number.MAX_VALUE;
     let minY:number = Number.MAX_VALUE;
@@ -175,7 +184,7 @@ export function cells( grid: Grid, arr: Cell[] = [] ): Cell[] {
     let maxY:number = Number.MIN_VALUE;
 
     for(let i:number = 0; i<cells.length; i++){
-        const c:Cell = cells[i];
+        const c:Partial<Cell> = cells[i];
         const tl:Point = topLeft(c);
         const br:Point = bottomRight(c);
 
@@ -201,10 +210,10 @@ export function cells( grid: Grid, arr: Cell[] = [] ): Cell[] {
  * @param {object} [bounds] optionally provide a rect object to be reused
  * @returns {Cell}
  */
-export function bounds(grid: Grid | Cell[], result?:object) : Cell {
+export function bounds(grid: Grid | Partial<Cell>[], result?:object) : Cell {
 
     if(Array.isArray(grid)){
-        return cellBounds(grid as Cell[], result);
+        return cellBounds(grid as Partial<Cell>[], result);
     }
 
     let left : number = val(grid,'x'),
@@ -707,9 +716,9 @@ export function numCellsInRange(a:Position, b:Position): number {
  * @param {object} [result]
  * @returns {Cell}
  */
-export function cellsMerged(grid: Grid | Cell[], posStart?:Position, posStop?:Position, result?:object): Cell {
+export function cellsMerged(grid: Grid | Partial<Cell>[], posStart?:Position, posStop?:Position, result?:object): Cell {
     return Array.isArray(grid) ?
-        cellBounds(grid as Cell[], result) :
+        cellBounds(grid as Partial<Cell>[], result) :
         cellBounds([ cellForPosition(grid, posStart), cellForPosition(grid, posStop) ], result);
 }
 
