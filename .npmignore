@@ -1,3 +1,5 @@
 README.md
 .travis.yml
-grid2d.js
+old-test.js
+test.ts
+test.js

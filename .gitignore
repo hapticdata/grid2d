@@ -10,3 +10,4 @@ package-lock.json
 test.js
 index.js
 readme/
+index.d.ts
